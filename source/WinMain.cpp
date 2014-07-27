@@ -4,8 +4,30 @@
 #include"Framework\Debug\CDebugLog.h"
 #include"Framework\Renderer\CD3D11Device.h"
 #include"Framework\Renderer\CSwapChain.h"
-#include"Framework\Shader\CShaderManager.h"
-#include"Framework\Model\CModelLoader.h"
+#include"Framework\Resource\Shader\CShaderManager.h"
+#include"Framework\Resource\\Model\CModelLoader.h"
+#include"CConstantBuffer.h"
+
+struct cbProjection{
+	XMFLOAT4X4 matProjection;
+};
+
+struct cbChangesAtEveryFrame
+{
+	XMFLOAT4X4 matView;
+};
+
+struct cbChangesAtEveryObject
+{
+	XMFLOAT4X4	matWorld;
+};
+
+struct cbChangesAtEveryMaterial
+{
+	XMFLOAT4	diffuse;
+	XMFLOAT4	speculer;
+	float		power;
+};
 
 int APIENTRY WinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
@@ -14,14 +36,28 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 {
 	CWindow window;
 	CSwapChain swapChain;
+	cbProjection test;
+	cbChangesAtEveryFrame everyFrame;
+	cbChangesAtEveryObject everyObject;
+	cbChangesAtEveryMaterial everyMaterial;
 
+	CConstantBuffer<cbProjection>	testCB(0);
+	CConstantBuffer<cbChangesAtEveryFrame>  everyFrameCBuffer(1);
+	CConstantBuffer<cbChangesAtEveryObject>  everyObjectCBuffer(2);
+	CConstantBuffer<cbChangesAtEveryMaterial>  everyMaterialCBuffer(3);
 
 	window.Create( hInstance, nCmdShow, L"test pmd", WINDOW_TYPE_WINDOW, DISPLAY_MODE_SVGA_800x600);
 	CDebugLog::Create();
 
 	CD3D11Device::GetInstance().Create();
 	swapChain.Create( &CD3D11Device::GetInstance(), &window);
-	
+
+	XMStoreFloat4x4( &test.matProjection, XMMatrixPerspectiveFovLH( XM_PIDIV4, (float)window.GetClientWidth()/window.GetClientHeight(), 1.0f, 100.0f));
+	XMStoreFloat4x4( &everyFrame.matView, XMMatrixLookAtLH( XMVectorSet( 0,0,-20.0f,1), XMVectorSet( 0,0,0,1), XMVectorSet( 0,1,0,1)));
+
+	testCB.Update( test);
+	everyFrameCBuffer.Update( everyFrame);
+
 	HRESULT hr;
 	ID3D11RenderTargetView*	pRenderTargetView;
 	ID3D11DepthStencilView*	pDepthStencilView;
@@ -32,7 +68,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	hr = CD3D11Device::GetInstance().GetD3dDevice()->CreateRenderTargetView( pBackBuffer, nullptr, &pRenderTargetView);
 	SafeRelease( pBackBuffer);
-
 
 	D3D11_TEXTURE2D_DESC	textureDesc;
 	D3D11_DEPTH_STENCIL_VIEW_DESC	dsvDesc;
@@ -86,7 +121,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	CShaderManager::GetInstance().CompilePS( L"resource/Shader/vs.fx", "psMain", "ps_5_0");
 	CShaderManager::GetInstance().CreateInputLayout( 0, inputElements, _countof(inputElements));
 
-	for( int i=0; i<modelData.GetNumMaterial(); ++i ){
+	for( UINT i=0; i<modelData.GetNumMaterial(); ++i ){
 		modelData.SetVertexShaderIndex( i, 0);
 		modelData.SetPixelShaderIndex( i, 0);
 		modelData.SetInputLayoutIndex( i, 0);

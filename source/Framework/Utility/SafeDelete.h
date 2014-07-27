@@ -13,6 +13,7 @@ inline bool InstanceOf( const Inst& inst)
 
 #define	instanceof( super, inst)	InstanceOf<super>(inst)
 
+
 // new‚³‚ê‚½‚à‚Ì‚ðdelete‚·‚é
 template<typename T>
 inline void	SafeDelete(T& ptr)
@@ -61,7 +62,6 @@ inline void SafeRelease(T& ptr)
 }
 
 
-
 // HANDLE‚ðclose‚·‚é
 //template<typename T>
 //inline BOOL	SafeCloseHandle(T& handle)
@@ -79,7 +79,5 @@ inline void SafeRelease(T& ptr)
 //
 //	return ok;
 //}
-
-
 
 #endif
