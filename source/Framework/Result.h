@@ -1,0 +1,13 @@
+#pragma once
+
+
+// Ç«ÇÃÇ†ÇΩÇËÇ≈ÉGÉâÅ[ãNÇ´ÇΩÇ©
+enum RESULT
+{
+	RESULT_FAILED_APPLY,
+	RESULT_FAILED_SYSTEM,
+	RESULT_FAILED_GAME,
+	RESULT_OK,
+	RESULT_NULL,
+	RESULT_ALREADY_EXIST,
+};
