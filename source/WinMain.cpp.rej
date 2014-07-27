@@ -1,0 +1,9 @@
+diff a/source/WinMain.cpp b/source/WinMain.cpp	(rejected hunks)
+@@ -4,7 +4,6 @@
+ #include"Framework\Debug\CDebugLog.h"
+ #include"Framework\Renderer\CD3D11Device.h"
+ #include"Framework\Renderer\CSwapChain.h"
+-#include"Framework\Model\CModelLoader.h"
+ #include"Framework\Resource\Shader\CShaderManager.h"
+ #include"Framework\Resource\\Model\CModelLoader.h"
+ #include"CConstantBuffer.h"
