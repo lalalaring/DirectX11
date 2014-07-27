@@ -4,17 +4,47 @@
 #include"Framework\Debug\CDebugLog.h"
 #include"Framework\Renderer\CD3D11Device.h"
 #include"Framework\Renderer\CSwapChain.h"
-#include"Framework\Shader\CShaderManager.h"
-#include"Framework\Model\CModelLoader.h"
+#include"Framework\Resource\Shader\CShaderManager.h"
+#include"Framework\Resource\Model\CModelLoader.h"
+#include"CConstantBuffer.h"
+
+struct cbProjection{
+	XMFLOAT4X4 matProjection;
+};
+
+struct cbChangesAtEveryFrame
+{
+	XMFLOAT4X4 matView;
+};
+
+struct cbChangesAtEveryObject
+{
+	XMFLOAT4X4	matWorld;
+};
+
+struct cbChangesAtEveryMaterial
+{
+	XMFLOAT4	diffuse;
+	XMFLOAT4	speculer;
+	float		power;
+};
 
 int APIENTRY WinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	LPSTR lpCmdLine,
 	int nCmdShow)
 {
-	CWindow window;
-	CSwapChain swapChain;
+ 	CWindow window;
+ 	CSwapChain swapChain;
+	cbProjection test;
+	cbChangesAtEveryFrame everyFrame;
+	cbChangesAtEveryObject everyObject;
+	cbChangesAtEveryMaterial everyMaterial;
 
+	CConstantBuffer<cbProjection>	testCB(0);
+	CConstantBuffer<cbChangesAtEveryFrame>  everyFrameCBuffer(1);
+	CConstantBuffer<cbChangesAtEveryObject>  everyObjectCBuffer(2);
+	CConstantBuffer<cbChangesAtEveryMaterial>  everyMaterialCBuffer(3);
 
 	window.Create( hInstance, nCmdShow, L"test pmd", WINDOW_TYPE_WINDOW, DISPLAY_MODE_SVGA_800x600);
 	CDebugLog::Create();
@@ -26,6 +56,13 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	ID3D11RenderTargetView*	pRenderTargetView;
 	ID3D11DepthStencilView*	pDepthStencilView;
 	ID3D11Texture2D* pBackBuffer;
+
+	XMStoreFloat4x4( &test.matProjection, XMMatrixPerspectiveFovLH( XM_PIDIV4, (float)window.GetClientWidth()/window.GetClientHeight(), 1.0f, 100.0f));
+	XMStoreFloat4x4( &everyFrame.matView, XMMatrixLookAtLH( XMVectorSet( 0,0,-20.0f,1), XMVectorSet( 0,0,0,1), XMVectorSet( 0,1,0,1)));
+
+	testCB.Update( test);
+	everyFrameCBuffer.Update( everyFrame);
+
 
 	// バックバッファのレンダーターゲットビュー作成
 	swapChain.GetSwapChain()->GetBuffer( 0, __uuidof(ID3D11Texture2D), (void**)&pBackBuffer);
