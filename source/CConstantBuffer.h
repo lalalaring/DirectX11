@@ -2,7 +2,9 @@
 
 #include"Framework\Renderer\CD3D11Device.h"
 
-template<typename T>
+struct s_cBStruct
+{};
+
 class CConstantBuffer
 {
 private:
@@ -11,11 +13,11 @@ private:
 	ID3D11Buffer*	m_pCbuffer;
 
 public:
-	CConstantBuffer( UINT _srotNum)
+	CConstantBuffer( size_t _bufferDataSize, UINT _srotNum)
 	{
 		m_srotNum = _srotNum;
+		m_size = _bufferDataSize;
 		m_pCbuffer = nullptr;
-		m_size = sizeof( T);
 	}
 	~CConstantBuffer()
 	{
@@ -30,7 +32,7 @@ public:
 	* @author   N.Kaji
 	* @date		2014/07/27
 	------------------------------*/
-	HRESULT	Update( T buffer)
+	HRESULT	Update( s_cBStruct* _pBufferData)
 	{
 		ID3D11Device*	pD3dDevice = CD3D11Device::GetInstance().GetD3dDevice();
 		ID3D11DeviceContext* pImmediate = CD3D11Device::GetInstance().GetImmediateContext();
@@ -40,10 +42,10 @@ public:
 		HRESULT hr;
 		D3D11_BUFFER_DESC bufferDesc;
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		bufferDesc.ByteWidth = sizeof( T);
-		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.ByteWidth = m_size;
+		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		bufferDesc.CPUAccessFlags = 0;
+		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		bufferDesc.MiscFlags = 0;
 		bufferDesc.StructureByteStride = 0;
 
@@ -51,10 +53,10 @@ public:
 		if( FAILED(hr) )
 			return E_FAIL;
 
-		pImmediate->Map( m_pCbuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		hr = pImmediate->Map( m_pCbuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 		if( FAILED(hr) )
 			return E_FAIL;
-		CopyMemory( mappedResource.pData, &buffer, sizeof( T));
+		CopyMemory( mappedResource.pData, _pBufferData, m_size);
 		pImmediate->Unmap( m_pCbuffer, 0);
 
 		return hr;
@@ -67,9 +69,9 @@ public:
 	* @author   N.Kaji
 	* @date
 	------------------------------*/
-	ID3D11Buffer*	GetConstantBuffer()const
+	ID3D11Buffer* const*	GetConstantBuffer()const
 	{
-		return m_pCbuffer;
+		return &m_pCbuffer;
 	}
 
 	/*------------------------------

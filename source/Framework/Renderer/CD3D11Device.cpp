@@ -52,8 +52,6 @@ RESULT	CD3D11Device::Create()
 
 	//if( featureThread.DriverConcurrentCreates )
 
-
-
 	return RESULT_OK;
 }
 

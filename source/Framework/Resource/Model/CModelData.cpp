@@ -96,7 +96,7 @@ UINT	CModelData::GetNumMaterial()const
 	return m_numMaterial;
 }
 
-ID3D11ShaderResourceView*	CModelData::GetShaderResourceView( UINT _materialIndex, UINT _textureIndex)const
+ID3D11ShaderResourceView* const*	CModelData::GetShaderResourceView( UINT _materialIndex, UINT _textureIndex)const
 {
 	if( _materialIndex >= m_materials.size() )
 		return nullptr;
@@ -104,7 +104,7 @@ ID3D11ShaderResourceView*	CModelData::GetShaderResourceView( UINT _materialIndex
 	if( _textureIndex >= m_materials[_materialIndex].m_srView.size() )
 		return nullptr;
 
-	return m_materials[_materialIndex].m_srView[_textureIndex];
+	return &m_materials[_materialIndex].m_srView[_textureIndex];
 }
 
 UINT	CModelData::GetVertexShaderIndex( UINT _materialIndex, UINT _shaderIndex)const
@@ -113,6 +113,14 @@ UINT	CModelData::GetVertexShaderIndex( UINT _materialIndex, UINT _shaderIndex)co
 		return NONE_SHADER_INDEX;
 
 	return m_materials[_materialIndex].m_vertexShaderIndex;
+}
+
+UINT	CModelData::GetInputLayoutIndex( UINT _materialIndex, UINT _shaderIndex)const
+{
+	if( _materialIndex >= m_numMaterial )
+		return NONE_SHADER_INDEX;
+
+	return m_materials[_materialIndex].m_inputLayoutIndex;
 }
 
 UINT CModelData::GetPixelShaderIndex( UINT _materialIndex, UINT _shaderIndex)const

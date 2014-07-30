@@ -91,7 +91,7 @@ public:
 
 	// Material.
 	UINT			GetNumMaterial()const;
-	ID3D11ShaderResourceView*	GetShaderResourceView( UINT _materialIndex, UINT _textureIndex)const;
+	ID3D11ShaderResourceView* const*	GetShaderResourceView( UINT _materialIndex, UINT _textureIndex)const;
 
 	// Shader.
 	UINT	GetVertexShaderIndex( UINT _materialIndex, UINT _shaderIndex)const;

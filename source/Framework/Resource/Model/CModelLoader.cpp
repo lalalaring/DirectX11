@@ -29,7 +29,7 @@ bool	CModelLoader::LoadPMD( std::wstring _filePath, CModelData* _pOut)
 		return false;
 
 	// シェーダもセットされていれば、CanRenderingをtrueに
-	if( _pOut->CheckShader() )
+//	if( _pOut->CheckShader() )
 		_pOut->m_canRendering = true;
 
 	return true;
@@ -104,6 +104,13 @@ bool	CModelLoader::CreateModelDataFromPMD( PmdVertex* _pPmdVertices, USHORT* _pP
 	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_SUBRESOURCE_DATA	subResourceData;
 
+	UINT* stride = new UINT[1];
+	UINT* offset = new UINT[1];
+	stride[0] = sizeof(PmdVertex);
+	offset[0] = 0;
+	_pModelData->m_pVertexStrides = stride;
+	_pModelData->m_pVertexOffsets = offset;
+
 	// S---------- Create Vertex buffer. ----------
 	bufferDesc.ByteWidth = sizeof( PmdVertex) * _pModelData->m_numVertex;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -131,6 +138,8 @@ bool	CModelLoader::CreateModelDataFromPMD( PmdVertex* _pPmdVertices, USHORT* _pP
 	hr = CD3D11Device::GetInstance().GetD3dDevice()->CreateBuffer( &bufferDesc, &subResourceData, &_pModelData->m_pIndexBuffer);
 	if( FAILED(hr) )
 		return false;
+
+	_pModelData->m_indexFormat = DXGI_FORMAT_R16_UINT;
 	// E---------- Create index buffer. ----------
 
 
@@ -161,11 +170,11 @@ bool	CModelLoader::CreateModelDataFromPMD( PmdVertex* _pPmdVertices, USHORT* _pP
 		if( i == 0 )
 		{
 			_pModelData->m_startIndexLocations[i] = 0;
-			_pModelData->m_indexCounts[i] = _pPmdMaterials[i].faceVertCnt-3;
+			_pModelData->m_indexCounts[i] = _pPmdMaterials[i].faceVertCnt;
 		}
 		else
 		{
-			_pModelData->m_startIndexLocations[i] = _pPmdMaterials[i-1].faceVertCnt;
+			_pModelData->m_startIndexLocations[i] = _pPmdMaterials[i-1].faceVertCnt + _pModelData->m_startIndexLocations[i-1];
 			_pModelData->m_indexCounts[i] = _pPmdMaterials[i].faceVertCnt;
 		}
 	}
